@@ -1,2 +1,3 @@
-# advent-of-code
-My solutions for Advent of Code  (Warning: Spoilers)
+# Advent of Code
+
+My solutions for [Advent of Code](https://adventofcode.com/)  (Warning: Spoilers)
