@@ -10,9 +10,15 @@ from solutions import (
 
 
 @pytest.fixture
-def example_data():
+def example_data_part_1():
     example_input = _load_puzzle_input(filename="example.txt")
-    return _parse(example_input)
+    return _parse(example_input, puzzle_part=1)
+
+
+@pytest.fixture
+def example_data_part_2():
+    example_input = _load_puzzle_input(filename="example.txt")
+    return _parse(example_input, puzzle_part=2)
 
 
 def test_hands_comparison():
@@ -22,11 +28,19 @@ def test_hands_comparison():
     assert (opponent_turn, player_turn) == (OpponentHand.ROCK, PlayerHand.ROCK)
 
 
-def test_parse(example_data):
-    assert example_data == [
+def test_parse_part_1(example_data_part_1):
+    assert example_data_part_1 == [
         (OpponentHand.ROCK, PlayerHand.PAPER),
         (OpponentHand.PAPER, PlayerHand.ROCK),
         (OpponentHand.SCISSORS, PlayerHand.SCISSORS),
+    ]
+
+
+def test_parse_part_2(example_data_part_2):
+    assert example_data_part_2 == [
+        (OpponentHand.ROCK, PlayerHand.ROCK),
+        (OpponentHand.PAPER, PlayerHand.ROCK),
+        (OpponentHand.SCISSORS, PlayerHand.ROCK),
     ]
 
 
@@ -39,6 +53,6 @@ def test_hand_score():
     assert HandScore[scissors].value == 3
 
 
-def test_total_player_score(example_data):
-    total_player_score = _total_player_score(example_data)
+def test_total_player_score(example_data_part_1):
+    total_player_score = _total_player_score(example_data_part_1)
     assert total_player_score == 15
