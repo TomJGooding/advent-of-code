@@ -5,13 +5,13 @@ PUZZLE_TITLE: str = "--- Day 1: Calorie Counting ---"
 PUZZLE_DIR = Path(__file__).parent
 
 
-def load_puzzle_input(filename: Optional[str] = None) -> str:
+def _load_puzzle_input(filename: Optional[str] = None) -> str:
     if not filename:
         filename = "input.txt"
     return (PUZZLE_DIR / filename).read_text().strip()
 
 
-def parse(puzzle_input: str) -> list[list[int]]:
+def _parse(puzzle_input: str) -> list[list[int]]:
     puzzle_input_lines: list[str] = puzzle_input.splitlines()
     puzzle_input_lines.append("")
 
@@ -28,18 +28,33 @@ def parse(puzzle_input: str) -> list[list[int]]:
     return data
 
 
-def highest_total_calories(data: list[list[int]]) -> int:
-    elves_total_calories: list[int] = [sum(calories) for calories in data]
-    return max(elves_total_calories)
+def _total_calories_per_elf(data: list[list[int]]) -> list[int]:
+    return [sum(calories) for calories in data]
 
 
-def main():
+def _highest_total_calories(total_calories_per_elf: list[int]) -> int:
+    return max(total_calories_per_elf)
+
+
+def _top_3_total_calories(total_calories_per_elf: list[int]) -> list[int]:
+    return sorted(total_calories_per_elf)[-3:]
+
+
+def main() -> None:
     print(PUZZLE_TITLE)
-    puzzle_input: str = load_puzzle_input()
-    data: list[list[int]] = parse(puzzle_input)
+    puzzle_input: str = _load_puzzle_input()
+    data: list[list[int]] = _parse(puzzle_input)
+    total_calories_per_elf: list[int] = _total_calories_per_elf(data)
 
-    answer_part_01: int = highest_total_calories(data)
-    print(f"Answer for part 1: {answer_part_01}")
+    highest_total_calories: int = _highest_total_calories(
+        total_calories_per_elf,
+    )
+    print(f"Answer for part 1: {highest_total_calories}")
+
+    top_3_total_calories: list[int] = _top_3_total_calories(
+        total_calories_per_elf,
+    )
+    print(f"Answer for part 2: {sum(top_3_total_calories)}")
 
 
 if __name__ == "__main__":
