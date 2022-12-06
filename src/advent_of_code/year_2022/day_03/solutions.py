@@ -15,20 +15,29 @@ def _load_puzzle_input(filename: Optional[str] = None) -> str:
     return (PUZZLE_DIR / filename).read_text().strip()
 
 
-def _parse(puzzle_input: str) -> list[tuple]:
+def _parse(puzzle_input: str, puzzle_part: int) -> list[tuple]:
     data: list[tuple] = []
-    for line in puzzle_input.splitlines():
-        half_length: int = len(line) // 2
-        compartment_1: str = line[:half_length]
-        compartment_2: str = line[half_length:]
-        rucksack: tuple = compartment_1, compartment_2
-        data.append(rucksack)
+    puzzle_input_lines: list[str] = puzzle_input.splitlines()
+
+    if puzzle_part == 1:
+        for line in puzzle_input_lines:
+            half_length: int = len(line) // 2
+            compartment_1: str = line[:half_length]
+            compartment_2: str = line[half_length:]
+            rucksack: tuple = compartment_1, compartment_2
+            data.append(rucksack)
+
+    elif puzzle_part == 2:
+        group_size: int = 3
+        for i in range(0, len(puzzle_input_lines), group_size):
+            elf_group = puzzle_input_lines[i : i + group_size]
+            data.append(tuple(elf_group))
 
     return data
 
 
-def _common_item(compartment_1, compartment_2) -> str:
-    common = list(set(compartment_1) & set(compartment_2))
+def _common_item(items_group: tuple) -> str:
+    common = list(set.intersection(*map(set, items_group)))
     return common[0]
 
 
@@ -38,9 +47,8 @@ def _priority(item: str) -> int:
 
 def _common_items_priorities(data: list[tuple]) -> list[int]:
     result: list[int] = []
-    for rucksack in data:
-        compartment_1, compartment_2 = rucksack
-        common_item: str = _common_item(compartment_1, compartment_2)
+    for items_group in data:
+        common_item: str = _common_item(items_group)
         item_priority: int = _priority(common_item)
         result.append(item_priority)
 
@@ -50,11 +58,12 @@ def _common_items_priorities(data: list[tuple]) -> list[int]:
 def main() -> None:
     print(PUZZLE_TITLE)
     puzzle_input: str = _load_puzzle_input()
-    data: list[tuple] = _parse(puzzle_input)
 
-    print(f"Answer for part 1: {sum(_common_items_priorities(data))}")
+    data_part_1: list[tuple] = _parse(puzzle_input, puzzle_part=1)
+    print(f"Answer for part 1: {sum(_common_items_priorities(data_part_1))}")
 
-    # print(f"Answer for part 2: {None}")
+    data_part_2: list[tuple] = _parse(puzzle_input, puzzle_part=2)
+    print(f"Answer for part 1: {sum(_common_items_priorities(data_part_2))}")
 
 
 if __name__ == "__main__":
