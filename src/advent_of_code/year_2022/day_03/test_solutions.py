@@ -3,28 +3,48 @@ from solutions import _common_item, _common_items_priorities, _load_puzzle_input
 
 
 @pytest.fixture
-def example_data():
+def example_data_part_1():
     example_input = _load_puzzle_input(filename="example.txt")
-    return _parse(example_input)
+    return _parse(example_input, puzzle_part=1)
 
 
-def test_parse(example_data):
+@pytest.fixture
+def example_data_part_2():
+    example_input = _load_puzzle_input(filename="example.txt")
+    return _parse(example_input, puzzle_part=2)
+
+
+def test_parse_part_1(example_data_part_1):
     expected_sample = [
         ("vJrwpWtwJgWr", "hcsFMMfFFhFp"),
         ("jqHRNqRjqzjGDLGL", "rsFMfFZSrLrFZsSL"),
         ("PmmdzqPrV", "vPwwTWBwg"),
     ]
-    assert example_data[:3] == expected_sample
+    assert example_data_part_1[:3] == expected_sample
+
+
+def test_parse_part_2(example_data_part_2):
+    assert example_data_part_2 == [
+        (
+            "vJrwpWtwJgWrhcsFMMfFFhFp",
+            "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL",
+            "PmmdzqPrVvPwwTWBwg",
+        ),
+        (
+            "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn",
+            "ttgJtRGJQctTZtZT",
+            "CrZsJsPPZsGzwwsLwLmpwMDw",
+        ),
+    ]
 
 
 def test_common_item():
     rucksack = ("vJrwpWtwJgWr", "hcsFMMfFFhFp")
-    compartment_1, compartment_2 = rucksack
-    assert _common_item(compartment_1, compartment_2) == "p"
+    assert _common_item(rucksack) == "p"
 
 
-def test_common_items_priorities(example_data):
-    assert _common_items_priorities(example_data) == [
+def test_common_items_priorities(example_data_part_1):
+    assert _common_items_priorities(example_data_part_1) == [
         16,
         38,
         42,
