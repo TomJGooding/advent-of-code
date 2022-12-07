@@ -4,6 +4,7 @@ from solutions import (
     _parse,
     _range_overlapping,
     _total_fully_overlapping_ranges,
+    _total_overlapping_ranges,
 )
 
 
@@ -30,11 +31,15 @@ def test_range_overlapping():
     assert range_overlapping == [3, 4, 5, 6, 7]
 
 
-def test_range_intersection_when_none():
+def test_range_overlapping_when_none():
     ranges = [range(2, 5), range(6, 9)]
-    range_interection = list(_range_overlapping(ranges))
-    assert not range_interection
+    range_overlapping = list(_range_overlapping(ranges))
+    assert not range_overlapping
 
 
 def test_total_fully_overlapping_ranges(example_data):
     assert _total_fully_overlapping_ranges(example_data) == 2
+
+
+def test_total_overlapping_ranges(example_data):
+    assert _total_overlapping_ranges(example_data) == 4

@@ -30,11 +30,12 @@ def _parse(puzzle_input: str) -> list[list[range]]:
 
 
 def _range_overlapping(ranges: list[range]) -> Generator:
-    shortest_range: range = min(ranges, key=len)
-    ranges.remove(shortest_range)
+    ranges_copy = ranges.copy()
+    shortest_range: range = min(ranges_copy, key=len)
+    ranges_copy.remove(shortest_range)
 
     for i in shortest_range:
-        if all(i in range_ for range_ in ranges):
+        if all(i in range_ for range_ in ranges_copy):
             yield i
 
 
@@ -49,11 +50,21 @@ def _total_fully_overlapping_ranges(data: list[list[range]]) -> int:
     return count
 
 
+def _total_overlapping_ranges(data: list[list[range]]) -> int:
+    count: int = 0
+    for ranges in data:
+        if list(_range_overlapping(ranges)):
+            count += 1
+
+    return count
+
+
 def main() -> None:
     print(PUZZLE_TITLE)
     puzzle_input: str = _load_puzzle_input("input.txt")
     data = _parse(puzzle_input)
     print(f"Answer for part 1: {_total_fully_overlapping_ranges(data)}")
+    print(f"Answer for part 2: {_total_overlapping_ranges(data)}")
 
 
 if __name__ == "__main__":
