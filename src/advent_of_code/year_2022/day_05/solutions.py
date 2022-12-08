@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from pathlib import Path
 from typing import Optional
 
@@ -79,9 +80,11 @@ def _parse_rearrangement_steps(rearrangement_input):
 
 
 def _rearrange_stacks(
-    crate_stacks: list[list[str]], rearrangement_steps: list[dict]
+    crate_stacks: list[list[str]],
+    rearrangement_steps: list[dict],
+    crane_model: str,
 ) -> list[list[str]]:
-    new_stacks = crate_stacks.copy()
+    new_stacks = deepcopy(crate_stacks)
     for step in rearrangement_steps:
         num_crates: int = step["num_crates"]
         from_stack_idx: int = step["from_stack"] - 1
@@ -90,7 +93,10 @@ def _rearrange_stacks(
         moved_crates: list[str] = new_stacks[from_stack_idx][-num_crates:]
 
         del new_stacks[from_stack_idx][-num_crates:]
-        new_stacks[to_stack_idx] += reversed(moved_crates)
+        if crane_model == "CrateMover 9000":
+            new_stacks[to_stack_idx] += reversed(moved_crates)
+        elif crane_model == "CrateMover 9001":
+            new_stacks[to_stack_idx] += moved_crates
 
     return new_stacks
 
@@ -104,8 +110,16 @@ def main() -> None:
     print(PUZZLE_TITLE)
     puzzle_input: str = _load_puzzle_input("input.txt")
     crate_stacks, rearrangement_steps = _parse(puzzle_input)
-    rearranged_stacks = _rearrange_stacks(crate_stacks, rearrangement_steps)
-    print(f"Answer for part 1: {_top_crates_message(rearranged_stacks)}")
+
+    rearranged_stacks_part1 = _rearrange_stacks(
+        crate_stacks, rearrangement_steps, crane_model="CrateMover 9000"
+    )
+    print(f"Answer for part 1: {_top_crates_message(rearranged_stacks_part1)}")
+
+    rearranged_stacks_part2 = _rearrange_stacks(
+        crate_stacks, rearrangement_steps, crane_model="CrateMover 9001"
+    )
+    print(f"Answer for part 2: {_top_crates_message(rearranged_stacks_part2)}")
 
 
 if __name__ == "__main__":
