@@ -51,9 +51,11 @@ def test_parse_rearrangement_steps():
     ]
 
 
-def test_rearrange_crate_stacks(example_data):
+def test_rearrange_crate_stacks_part1(example_data):
     crate_stacks, rearrangement_steps = example_data
-    assert _rearrange_stacks(crate_stacks, rearrangement_steps) == [
+    assert _rearrange_stacks(
+        crate_stacks, rearrangement_steps, crane_model="CrateMover 9000"
+    ) == [
         ["[C]"],
         ["[M]"],
         ["[P]", "[D]", "[N]", "[Z]"],
@@ -67,3 +69,14 @@ def test_top_crates_message():
         ["[P]", "[D]", "[N]", "[Z]"],
     ]
     assert _top_crates_message(stacks) == "CMZ"
+
+
+def test_rearrange_crate_stacks_part2(example_data):
+    crate_stacks, rearrangement_steps = example_data
+    assert _rearrange_stacks(
+        crate_stacks, rearrangement_steps, crane_model="CrateMover 9001"
+    ) == [
+        ["[M]"],
+        ["[C]"],
+        ["[P]", "[Z]", "[N]", "[D]"],
+    ]
