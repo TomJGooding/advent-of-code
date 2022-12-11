@@ -11,6 +11,10 @@ def _load_puzzle_input(filename: Optional[str] = None) -> str:
     return (PUZZLE_DIR / filename).read_text().strip()
 
 
+DISK_SIZE: int = 70_000_000
+UPDATE_SIZE: int = 30_000_000
+
+
 class Directory:
     def __init__(self, path: str) -> None:
         self.path: str = path
@@ -106,26 +110,53 @@ def _create_file(file_listing: str, cwd_path: str) -> File:
 
 
 def _filter_directories_by_size(
-    max_size: int, directories: list[Directory]
+    directories: list[Directory],
+    min_size: int = 0,
+    max_size: int = DISK_SIZE,
 ) -> list[Directory]:
-    return [dir for dir in directories if dir.size <= max_size]
+    return [
+        directory
+        for directory in directories
+        if min_size <= directory.size and directory.size <= max_size
+    ]
+
+
+def _available_disk_space(
+    directories: list[Directory],
+    disk_size: int = DISK_SIZE,
+) -> int:
+    used_space: int = 0
+    for directory in directories:
+        if directory.path == "/":
+            used_space = directory.size
+    return disk_size - used_space
 
 
 def main() -> None:
     print(PUZZLE_TITLE)
     puzzle_input: str = _load_puzzle_input("input.txt")
     directories = _parse(puzzle_input)
+
     print(
         "Answer for part 1: ",
         sum(
             [
                 dir.size
                 for dir in _filter_directories_by_size(
-                    100000,
-                    directories,
+                    max_size=100000, directories=directories
                 )
             ]
         ),
+    )
+
+    current_available_space = _available_disk_space(directories)
+    candidate_directories_for_deletion = _filter_directories_by_size(
+        min_size=UPDATE_SIZE - current_available_space,
+        directories=directories,
+    )
+    print(
+        "Answer for part 2: ",
+        min([dir.size for dir in candidate_directories_for_deletion]),
     )
 
 

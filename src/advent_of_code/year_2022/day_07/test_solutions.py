@@ -1,5 +1,11 @@
 import pytest
-from solutions import Directory, _filter_directories_by_size, _load_puzzle_input, _parse
+from solutions import (
+    Directory,
+    _available_disk_space,
+    _filter_directories_by_size,
+    _load_puzzle_input,
+    _parse,
+)
 
 
 @pytest.fixture
@@ -78,9 +84,12 @@ def test_filter_directories_by_size(example_data):
     actual = [
         dir.path
         for dir in _filter_directories_by_size(
-            100000,
-            example_data,
+            max_size=100000, directories=example_data
         )
     ]
     expected = ["/a", "/a/e"]
     assert actual == expected
+
+
+def test_available_disk_space(example_data):
+    assert _available_disk_space(example_data) == 21618835
