@@ -18,6 +18,7 @@ class DirectionType(Enum):
     DOWN = "D"
     LEFT = "L"
     RIGHT = "R"
+    NONE = "N"
 
 
 @dataclass
@@ -26,21 +27,21 @@ class Motion:
     steps: int
 
 
-class KnotType(Enum):
-    HEAD = "H"
-    TAIL = "T"
-
-
 @dataclass
 class Knot:
     x: int
     y: int
-    type: KnotType
     positions_visited: list[tuple]
+    last_direction: DirectionType = DirectionType.NONE
 
     def move_to(self, x: int, y: int) -> None:
         self.x, self.y = x, y
         self.positions_visited.append((x, y))
+
+
+class Rope:
+    def __init__(self) -> None:
+        self.knots: list[Knot] = []
 
 
 def _parse(puzzle_input: str) -> list[Motion]:
@@ -54,69 +55,78 @@ def _parse(puzzle_input: str) -> list[Motion]:
     return data
 
 
-def _run_knot_motions(
-    series_motions: list[Motion], head_knot: Knot, tail_knot: Knot
-) -> tuple[Knot, Knot]:
+def _run_motions(series_motions: list[Motion], rope: Rope) -> Rope:
     for motion in series_motions:
-        if motion.direction == DirectionType.UP:
-            for _ in range(motion.steps):
-                head_knot.move_to(head_knot.x, head_knot.y + 1)
-                if not is_touching(head_knot, tail_knot):
-                    _move_tail_knot(head_knot, tail_knot, motion)
+        for _ in range(motion.steps):
+            for idx, knot in enumerate(rope.knots):
+                if idx == 0:
+                    _move_head_knot(knot, motion)
+                    continue
 
-        elif motion.direction == DirectionType.DOWN:
-            for _ in range(motion.steps):
-                head_knot.move_to(head_knot.x, head_knot.y - 1)
-                if not is_touching(head_knot, tail_knot):
-                    _move_tail_knot(head_knot, tail_knot, motion)
+                if not is_touching(
+                    knot_ahead=rope.knots[idx - 1],
+                    curr_knot=knot,
+                ):
+                    _move_curr_knot(
+                        knot_ahead=rope.knots[idx - 1],
+                        curr_knot=knot,
+                    )
 
-        elif motion.direction == DirectionType.LEFT:
-            for _ in range(motion.steps):
-                head_knot.move_to(head_knot.x - 1, head_knot.y)
-                if not is_touching(head_knot, tail_knot):
-                    _move_tail_knot(head_knot, tail_knot, motion)
-
-        elif motion.direction == DirectionType.RIGHT:
-            for _ in range(motion.steps):
-                head_knot.move_to(head_knot.x + 1, head_knot.y)
-                if not is_touching(head_knot, tail_knot):
-                    _move_tail_knot(head_knot, tail_knot, motion)
-
-    return head_knot, tail_knot
+    return rope
 
 
-def is_touching(head_knot: Knot, tail_knot: Knot) -> bool:
-    return head_knot.x - tail_knot.x in range(
-        -1, 2
-    ) and head_knot.y - tail_knot.y in range(-1, 2)
-
-
-def _move_tail_knot(head_knot: Knot, tail_knot: Knot, motion: Motion) -> None:
+def _move_head_knot(knot: Knot, motion: Motion) -> None:
     if motion.direction == DirectionType.UP:
-        x_diff: int = head_knot.x - tail_knot.x
-        tail_knot.move_to(tail_knot.x + x_diff, tail_knot.y + 1)
+        knot.move_to(knot.x, knot.y + 1)
+        knot.last_direction = DirectionType.UP
+
     elif motion.direction == DirectionType.DOWN:
-        x_diff: int = head_knot.x - tail_knot.x
-        tail_knot.move_to(tail_knot.x + x_diff, tail_knot.y - 1)
+        knot.move_to(knot.x, knot.y - 1)
+        knot.last_direction = DirectionType.DOWN
+
     elif motion.direction == DirectionType.LEFT:
-        y_diff: int = head_knot.y - tail_knot.y
-        tail_knot.move_to(tail_knot.x - 1, tail_knot.y + y_diff)
+        knot.move_to(knot.x - 1, knot.y)
+        knot.last_direction = DirectionType.LEFT
+
     elif motion.direction == DirectionType.RIGHT:
-        y_diff: int = head_knot.y - tail_knot.y
-        tail_knot.move_to(tail_knot.x + 1, tail_knot.y + y_diff)
+        knot.move_to(knot.x + 1, knot.y)
+        knot.last_direction = DirectionType.RIGHT
+
+
+def is_touching(knot_ahead: Knot, curr_knot: Knot) -> bool:
+    return knot_ahead.x - curr_knot.x in range(
+        -1, 2
+    ) and knot_ahead.y - curr_knot.y in range(-1, 2)
+
+
+def _move_curr_knot(knot_ahead: Knot, curr_knot: Knot) -> None:
+    x_diff: int = knot_ahead.x - curr_knot.x
+    y_diff: int = knot_ahead.y - curr_knot.y
+
+    if knot_ahead.last_direction == DirectionType.UP:
+        curr_knot.move_to(curr_knot.x + x_diff, curr_knot.y + 1)
+
+    elif knot_ahead.last_direction == DirectionType.DOWN:
+        curr_knot.move_to(curr_knot.x + x_diff, curr_knot.y - 1)
+
+    elif knot_ahead.last_direction == DirectionType.LEFT:
+        curr_knot.move_to(curr_knot.x - 1, curr_knot.y + y_diff)
+
+    elif knot_ahead.last_direction == DirectionType.RIGHT:
+        curr_knot.move_to(curr_knot.x + 1, curr_knot.y + y_diff)
 
 
 def main() -> None:
     print(PUZZLE_TITLE)
     puzzle_input: str = _load_puzzle_input("input.txt")
     series_motions: list[Motion] = _parse(puzzle_input)
-    head_knot = Knot(x=0, y=0, type=KnotType.HEAD, positions_visited=[(0, 0)])
-    tail_knot = Knot(x=0, y=0, type=KnotType.TAIL, positions_visited=[(0, 0)])
 
-    _run_knot_motions(series_motions, head_knot, tail_knot)
-
-    tail_knot_unique_positions = set(tail_knot.positions_visited)
-    print(f"Answer for part 1: {len(tail_knot_unique_positions)}")
+    short_rope = Rope()
+    for _ in range(2):
+        short_rope.knots.append(Knot(x=0, y=0, positions_visited=[(0, 0)]))
+    _run_motions(series_motions, short_rope)
+    short_rope_tail = short_rope.knots[-1]
+    print(f"Answer for part 1: {len(set(short_rope_tail.positions_visited))}")
 
 
 if __name__ == "__main__":

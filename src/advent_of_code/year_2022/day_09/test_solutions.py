@@ -2,12 +2,12 @@ import pytest
 from solutions import (
     DirectionType,
     Knot,
-    KnotType,
     Motion,
+    Rope,
     _load_puzzle_input,
-    _move_tail_knot,
+    _move_curr_knot,
     _parse,
-    _run_knot_motions,
+    _run_motions,
     is_touching,
 )
 
@@ -19,23 +19,30 @@ def example_data():
 
 
 @pytest.fixture
-def head_knot():
-    return Knot(
-        x=0,
-        y=0,
-        type=KnotType.HEAD,
-        positions_visited=[(0, 0)],
-    )
+def example_data_2():
+    example_input = _load_puzzle_input(filename="example_2.txt")
+    return _parse(example_input)
 
 
 @pytest.fixture
-def tail_knot():
-    return Knot(
-        x=0,
-        y=0,
-        type=KnotType.TAIL,
-        positions_visited=[(0, 0)],
-    )
+def short_rope():
+    short_rope = Rope()
+    for _ in range(2):
+        short_rope.knots.append(Knot(x=0, y=0, positions_visited=[(0, 0)]))
+    return short_rope
+
+
+@pytest.fixture
+def long_rope():
+    long_rope = Rope()
+    for _ in range(10):
+        long_rope.knots.append(Knot(x=0, y=0, positions_visited=[(0, 0)]))
+    return long_rope
+
+
+@pytest.fixture
+def head_knot():
+    return Knot(x=0, y=0, positions_visited=[(0, 0)])
 
 
 def test_parse(example_data):
@@ -52,48 +59,24 @@ def test_parse(example_data):
 
 
 def test_run_test_motions_with_head_knot_final_position(
-    example_data, head_knot, tail_knot
+    example_data,
+    short_rope,
 ):
+    short_rope = short_rope
     series_motions = example_data
-    head_knot = head_knot
-    tail_knot = tail_knot
-    _run_knot_motions(series_motions, head_knot, tail_knot)
+    _run_motions(series_motions, short_rope)
+    head_knot = short_rope.knots[0]
     assert head_knot.positions_visited[-1] == (2, 2)
 
 
-def testis_touching_when_true(head_knot):
+def test_is_touching_when_true(head_knot):
     head_knot = head_knot
 
-    tail_touching_up = Knot(
-        x=0,
-        y=1,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
-    tail_touching_down = Knot(
-        x=0,
-        y=-1,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
-    tail_touching_left = Knot(
-        x=-1,
-        y=0,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
-    tail_touching_right = Knot(
-        x=1,
-        y=0,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
-    tail_touching_diagonal = Knot(
-        x=1,
-        y=-1,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
+    tail_touching_up = Knot(x=0, y=1, positions_visited=[])
+    tail_touching_down = Knot(x=0, y=-1, positions_visited=[])
+    tail_touching_left = Knot(x=-1, y=0, positions_visited=[])
+    tail_touching_right = Knot(x=1, y=0, positions_visited=[])
+    tail_touching_diagonal = Knot(x=1, y=-1, positions_visited=[])
 
     assert is_touching(head_knot, tail_touching_up)
     assert is_touching(head_knot, tail_touching_down)
@@ -102,39 +85,14 @@ def testis_touching_when_true(head_knot):
     assert is_touching(head_knot, tail_touching_diagonal)
 
 
-def testis_touching_when_false(head_knot):
+def test_is_touching_when_false(head_knot):
     head_knot = head_knot
 
-    tail_touching_up = Knot(
-        x=0,
-        y=2,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
-    tail_touching_down = Knot(
-        x=0,
-        y=-2,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
-    tail_touching_left = Knot(
-        x=-2,
-        y=0,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
-    tail_touching_right = Knot(
-        x=2,
-        y=0,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
-    tail_touching_diagonal = Knot(
-        x=2,
-        y=-1,
-        type=KnotType.TAIL,
-        positions_visited=[],
-    )
+    tail_touching_up = Knot(x=0, y=2, positions_visited=[])
+    tail_touching_down = Knot(x=0, y=-2, positions_visited=[])
+    tail_touching_left = Knot(x=-2, y=0, positions_visited=[])
+    tail_touching_right = Knot(x=2, y=0, positions_visited=[])
+    tail_touching_diagonal = Knot(x=2, y=-1, positions_visited=[])
 
     assert not is_touching(head_knot, tail_touching_up)
     assert not is_touching(head_knot, tail_touching_down)
@@ -144,37 +102,37 @@ def testis_touching_when_false(head_knot):
 
 
 def test_run_test_motions_with_tail_knot_final_position(
-    example_data, head_knot, tail_knot
+    example_data,
+    short_rope,
 ):
     series_motions = example_data
-    head_knot = head_knot
-    tail_knot = tail_knot
-    _run_knot_motions(series_motions, head_knot, tail_knot)
+    short_rope = short_rope
+    _run_motions(series_motions, short_rope)
+    head_knot = short_rope.knots[0]
+    tail_knot = short_rope.knots[-1]
+    assert tail_knot.positions_visited != head_knot.positions_visited
     assert tail_knot.positions_visited[-1] == (1, 2)
 
 
-def test_move_tail_knot_straight_up(head_knot):
-    head_knot = head_knot
-    tail_knot = Knot(x=0, y=-2, type=KnotType.TAIL, positions_visited=[])
-    motion = Motion(DirectionType.UP, steps=1)
-    _move_tail_knot(head_knot, tail_knot, motion)
+def test_move_curr_knot_straight_up(head_knot):
+    head_knot.last_direction = DirectionType.UP
+    tail_knot = Knot(x=0, y=-2, positions_visited=[])
+    _move_curr_knot(head_knot, tail_knot)
     assert tail_knot.x == 0
     assert tail_knot.y == -1
 
 
-def test_move_tail_knot_straight_right(head_knot):
-    head_knot = head_knot
-    tail_knot = Knot(x=-2, y=0, type=KnotType.TAIL, positions_visited=[])
-    motion = Motion(DirectionType.RIGHT, steps=1)
-    _move_tail_knot(head_knot, tail_knot, motion)
+def test_move_curr_knot_straight_right(head_knot):
+    head_knot.last_direction = DirectionType.RIGHT
+    tail_knot = Knot(x=-2, y=0, positions_visited=[])
+    _move_curr_knot(head_knot, tail_knot)
     assert tail_knot.x == -1
     assert tail_knot.y == 0
 
 
-def test_move_tail_knot_diagonally_up_right(head_knot):
-    head_knot = head_knot
-    tail_knot = Knot(x=-1, y=-2, type=KnotType.TAIL, positions_visited=[])
-    motion = Motion(DirectionType.UP, steps=1)
-    _move_tail_knot(head_knot, tail_knot, motion)
+def test_move_curr_knot_diagonally_up_right(head_knot):
+    head_knot.last_direction = DirectionType.UP
+    tail_knot = Knot(x=-1, y=-2, positions_visited=[])
+    _move_curr_knot(head_knot, tail_knot)
     assert tail_knot.x == 0
     assert tail_knot.y == -1
