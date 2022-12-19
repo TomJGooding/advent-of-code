@@ -48,10 +48,9 @@ def test_parse(example_data):
     ]
 
 
-def test_play_monkey_in_the_middle_with_single_round(example_data):
+def test_play_monkey_in_the_middle_with_single_round_and_relief(example_data):
     actual = _play_monkey_in_the_middle(
-        monkeys=example_data,
-        number_rounds=1,
+        monkeys=example_data, number_rounds=1, undamaged_relief=True
     )
     expected = [
         Monkey(
@@ -97,9 +96,22 @@ def test_play_monkey_in_the_middle_with_single_round(example_data):
     assert actual == expected
 
 
-def test_play_monkey_in_the_middle_with_twenty_rounds(example_data):
-    new_monkeys = _play_monkey_in_the_middle(monkeys=example_data)
+def test_play_monkey_in_the_middle_with_twenty_rounds_and_relief(example_data):
+    new_monkeys = _play_monkey_in_the_middle(
+        monkeys=example_data,
+        number_rounds=20,
+        undamaged_relief=True,
+    )
     actual = [monkey.count_inspections for monkey in new_monkeys]
     expected = [101, 95, 7, 105]
     assert actual == expected
     assert _calculate_monkey_business(new_monkeys) == 10605
+
+
+def test_play_monkey_in_the_middle_with_twenty_rounds_no_relief(example_data):
+    new_monkeys = _play_monkey_in_the_middle(
+        monkeys=example_data, number_rounds=20, undamaged_relief=False
+    )
+    actual = [monkey.count_inspections for monkey in new_monkeys]
+    expected = [99, 97, 8, 103]
+    assert actual == expected
