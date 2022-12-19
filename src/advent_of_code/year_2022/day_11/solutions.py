@@ -1,13 +1,12 @@
 import math
 import re
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
 PUZZLE_TITLE: str = "--- Day 11: Monkey in the Middle ---"
 PUZZLE_DIR = Path(__file__).parent
-
-NUMBER_ROUNDS: int = 20
 
 
 def _load_puzzle_input(filename: Optional[str] = None) -> str:
@@ -36,7 +35,7 @@ class Monkey:
     test_false_throw_to_monkey: int
     count_inspections: int = 0
 
-    def inspect_item(self) -> None:
+    def inspect_item(self, undamaged_relief: bool) -> None:
         worry_level: int = self.items[0].worry_level
         operator, input = self.inspect_operation.split()
         input_num: int = int(input) if input != "old" else worry_level
@@ -46,7 +45,11 @@ class Monkey:
             worry_level *= input_num
 
         self.count_inspections += 1
-        self.items[0].worry_level = worry_level // 3
+
+        if undamaged_relief:
+            self.items[0].worry_level = worry_level // 3
+        else:
+            self.items[0].worry_level = worry_level
 
     def throw_item(self) -> Throw:
         if self.test_item() is True:
@@ -110,13 +113,13 @@ def _parse(puzzle_input: str) -> list[Monkey]:
 
 
 def _play_monkey_in_the_middle(
-    monkeys: list[Monkey], number_rounds: int = NUMBER_ROUNDS
+    monkeys: list[Monkey], number_rounds: int, undamaged_relief: bool
 ) -> list[Monkey]:
-    new_monkeys = monkeys.copy()
+    new_monkeys = deepcopy(monkeys)
     for _ in range(number_rounds):
         for monkey in new_monkeys:
             while monkey.items:
-                monkey.inspect_item()
+                monkey.inspect_item(undamaged_relief)
                 throw: Throw = monkey.throw_item()
                 new_monkeys[throw.to_monkey_id].items.append(throw.item)
 
@@ -145,8 +148,10 @@ def main() -> None:
     puzzle_input: str = _load_puzzle_input("input.txt")
     monkeys = _parse(puzzle_input)
 
-    new_monkeys = _play_monkey_in_the_middle(monkeys)
-    print("Answer for part 1: ", _calculate_monkey_business(new_monkeys))
+    new_monkeys_p1 = _play_monkey_in_the_middle(
+        monkeys=monkeys, number_rounds=20, undamaged_relief=True
+    )
+    print("Answer for part 1:", _calculate_monkey_business(new_monkeys_p1))
 
 
 if __name__ == "__main__":
