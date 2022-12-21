@@ -21,7 +21,7 @@ My solutions for [Advent of Code 2022](https://adventofcode.com/2022)
 | Day 10 | :star: |        |
 | Day 11 | :star: |        |
 | Day 12 | :star: |        |
-| Day 13 |        |        |
+| Day 13 | :star: |        |
 | Day 14 |        |        |
 | Day 15 |        |        |
 | Day 16 |        |        |
